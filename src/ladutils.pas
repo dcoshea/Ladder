@@ -19,6 +19,6 @@ END;
 PROCEDURE Beep;
 BEGIN
   IF sound THEN
-    Write(#7);
+    NCurses.beep;
 END;
 
