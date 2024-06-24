@@ -236,18 +236,9 @@ loopAgain: { If just started falling we need to retest all conditions }
         IF a.DirRequest IN [STOPPED, UP, DOWN, RIGHT, LEFT] THEN
           UpdateDir(a);
 
-      JUMPUP:
-        IF a.DirRequest = LEFT THEN
-          a.Dir := JUMPLEFT
-        ELSE
-          a.Dir := JUMPRIGHT;
-
       JUMPRIGHT, JUMPLEFT:
         IF a.DirRequest = STOPPED THEN
           UpdateDir(a);
-
-      PENDING:
-        UpdateDir(a);
 
     END;
   END;
