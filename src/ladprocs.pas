@@ -424,11 +424,15 @@ BEGIN
         '     Level   ', displayLevel : 2,
         '     Score ', m.Score : 5, '00',
         '                 Bonus time    ', m.RemainingBonusTime : 2, '00');
-  GotoXY(1, 23); Write('Get ready!');
-  Delay(1000);
+  {
+    Wait for a key before starting to support slow terminals - the user can
+    press a key once they see the message.
+  }
   WHILE KeyPressed DO
     ch := ReadKey;
-  GotoXY(1, 23); Write('          ');
+  GotoXY(1, 23); Write('Press a key to start');
+  ReadKey; { ignore result }
+  GotoXY(1, 23); Write('                    ');
 END;
 
 {
