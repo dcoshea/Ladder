@@ -9,9 +9,13 @@ VAR
   nextNewLad : INTEGER;                     { score for next new lad awarded }
   dataFileContents : DataFileType;
   highScores : ARRAY[1..NumHighScores] OF HighScoreType;
-  sound : BOOLEAN;                          { TRUE for sound }
-  insults : BOOLEAN;                        { TRUE for insults }
+  sound : BOOLEAN = TRUE;                   { TRUE for sound }
+  insults : BOOLEAN = TRUE;                 { TRUE for insults }
   levelCycle : INTEGER;
   displayLevel : INTEGER;                   { displayed map level }
-  upKey, downKey, leftKey, rightKey : CHAR; { lad direction control keys }
+  { lad direction control keys }
+  upKey : CHAR = '8';
+  downKey : CHAR = '2';
+  leftKey : CHAR = '4';
+  rightKey : CHAR = '6';
 

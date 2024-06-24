@@ -1,7 +1,6 @@
 CONST
   Version = '1.33FPCncurses0.1';
   DataFileName = 'LADDER.DAT';
-  ConfigFileName = 'LADCONF.COM';
   NumHighScores = 5;           { # of stored high scores }
   DataFileStrLength = 31;      { # chars in data file terminal config strings }
   DataFileNameLength = 29;     { # chars in high score names }
@@ -14,5 +13,7 @@ CONST
   MaxDispensers = 3;           { max # of rock dispensers on a level }
 
   JumpsLen = 6;                { max # of positions in a jump sequence }
+
+  ConfigPromptY = 14;          { Y coordinate for prompts in the config menu }
 
 

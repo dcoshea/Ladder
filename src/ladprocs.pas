@@ -1,3 +1,51 @@
+FUNCTION BooleanToYN(value : BOOLEAN) : CHAR;
+BEGIN
+  IF value THEN
+    BooleanToYN := 'Y'
+  ELSE
+    BooleanToYN := 'N';
+END;
+
+{
+  Update the settings and high scores in LADDER.DAT. See the comments in
+  ReadDataFile.
+}
+PROCEDURE WriteDataFile;
+VAR
+  dataFile : FILE;
+  i, j : INTEGER;
+BEGIN
+  {$I-}
+  Assign(dataFile, DataFileName);
+  Rewrite(dataFile);
+  IF IOresult <> 0 THEN BEGIN
+    WriteLN('Rewrite failed on LADDER.DAT');
+    Halt;
+  END;
+  WITH dataFileContents DO BEGIN
+    Flags[0] := BooleanToYN(sound);
+    Flags[1] := BooleanToYN(insults);
+    Keys[0] := downKey;
+    Keys[1] := leftKey;
+    Keys[2] := rightKey;
+    Keys[3] := upKey;
+    FOR i := 1 TO NumHighScores DO BEGIN
+      Highs[i][0] := Length(highScores[i].Name);
+      Highs[i][1] := Lo(highScores[i].Score);
+      Highs[i][2] := Hi(highScores[i].Score);
+      FOR j := 1 TO Highs[i][0] DO
+        Highs[i][j + 2] := ORD(highScores[i].Name[j]);
+    END;
+    BlockWrite(dataFile, dataFileContents, SizeOf(dataFileContents) DIV 128);
+    IF IOresult <> 0 THEN BEGIN
+      WriteLN('BlockWrite failed on LADDER.DAT');
+      Halt;
+    END;
+  END;
+  Close(dataFile);
+  {$I+}
+END;
+
 PROCEDURE Instructions;
 VAR
   ignored : CHAR;
@@ -30,21 +78,118 @@ BEGIN
   Read(ignored);
 END;
 
-PROCEDURE ConfigureLadder;
-VAR
-  configPgm : FILE;
-  Ok : BOOLEAN;
+PROCEDURE ConfigToggleFlag(VAR flag : BOOLEAN; y : INTEGER);
 BEGIN
-  {$I-}
-  Assign(configPgm, ConfigFileName);
-  WriteLN('Linking to configuration program');
-  Execute(configPgm);
-  Ok := IOresult = 0; { IOresult must be called after failed Execute }
-  {$I+}
+  flag := NOT flag;
+  GotoXY(21, y);
+  Write(BooleanToYN(flag));
+END;
+
+{
+  Return TRUE if and only if the given character is a printable ASCII
+  character.
+}
+FUNCTION IsPrint(value : CHAR) : BOOLEAN;
+BEGIN
+  IsPrint := (Ord(value) >= 32) AND (Ord(value) < 127);
+END;
+
+PROCEDURE ConfigKey(VAR key : CHAR; description : STRING; y : INTEGER);
+BEGIN
+  GotoXY(1, ConfigPromptY);
+  Write('Press the new key for ', description, ': ');
+  REPEAT
+    { convert to uppercase for consistency with ladmain.pas }
+    key := UpCase(ReadKey);
+    GotoXY(1, ConfigPromptY);
+    ClrEol;
+    {
+      Require that keys be printable as ASCII characters since they're
+      printed in the main menu.  It is not known how consistent this is with
+      the behavior of LADCONF.COM.
+    }
+    IF NOT IsPrint(key) THEN
+      Write('Error: key must be printable, try again: ')
+    ELSE IF key = ' ' THEN
+      Write('Error: space is reserved for jumping, try again: ')
+    ELSE
+      BREAK;
+  UNTIL FALSE;
+  GotoXY(24, y);
+  Write(key);
+END;
+
+PROCEDURE ConfigureLadder(allowDiscard : BOOLEAN);
+VAR
+  ch : CHAR;
+
+  configSoundOn : BOOLEAN;
+  configInsultsOn : BOOLEAN;
+  configUpKey : CHAR;
+  configDownKey : CHAR;
+  configLeftKey : CHAR;
+  configRightKey : CHAR;
+BEGIN
+  configSoundOn := sound;
+  configInsultsOn := insults;
+  configUpKey := upKey;
+  configDownKey := downKey;
+  configLeftKey := leftKey;
+  configRightKey := rightKey;
+
+  ClrScr;
+  WriteLN('Configuration for (not-)Ladder');
+  WriteLN('------------------------------');
   WriteLN;
-  WriteLN('Unable to link to LADCONF.COM');
-  WriteLN('Ladder configuration program missing');
-  Halt;
+  WriteLN('S = Toggle sound:   ', BooleanToYN(configSoundOn));
+  WriteLN('I = Toggle insults: ', BooleanToYN(configInsultsOn));
+  WriteLN;
+  WriteLN('U = Set key for Up:    ', configUpKey);
+  WriteLN('D = Set key for Down:  ', configDownKey);
+  WriteLN('L = Set key for Left:  ', configLeftKey);
+  WriteLN('R = Set key for Right: ', configRightKey);
+  WriteLN;
+  IF allowDiscard THEN
+    WriteLN('E = Exit to main menu, saving or discarding changes')
+  ELSE
+    WriteLN('E = Save changes and exit to main menu');
+
+  REPEAT
+    GotoXY(1, ConfigPromptY);
+    ClrEol;
+    Write('Enter one of the above: ');
+
+    ch := UpCase(ReadKey);
+    CASE ch OF
+      'S' : ConfigToggleFlag(configSoundOn,   4);
+      'I' : ConfigToggleFlag(configInsultsOn, 5);
+      'U' : ConfigKey(configUpKey,    'Up',     7);
+      'D' : ConfigKey(configDownKey,  'Down',   8);
+      'L' : ConfigKey(configLeftKey,  'Left',   9);
+      'R' : ConfigKey(configRightKey, 'Right', 10);
+      { 'E' is handled below }
+    END;
+  UNTIL ch = 'E';
+
+  if allowDiscard THEN BEGIN
+    GotoXY(1, ConfigPromptY);
+    ClrEol;
+    Write('Save changes (Y/N)? ');
+    REPEAT
+      ch := UpCase(ReadKey);
+      IF ch = 'N' THEN
+        EXIT;
+    UNTIL ch = 'Y';
+  END;
+
+  sound := configSoundOn;
+  insults := configInsultsOn;
+  upKey := configUpKey;
+  downKey := configDownKey;
+  leftKey := configLeftKey;
+  rightKey := configRightKey;
+
+  WriteDataFile;
 END;
 
 PROCEDURE MainMenu;
@@ -125,7 +270,9 @@ BEGIN
       IF KeyPressed THEN BEGIN
         ch := ReadKey;
         ch := UpCase(ch);
-        IF ch = 'L' THEN BEGIN { change playing speed }
+        IF ch = 'C' THEN
+          ConfigureLadder(TRUE)
+        ELSE IF ch = 'L' THEN BEGIN { change playing speed }
           playSpeed := SUCC(playSpeed MOD NumPlaySpeeds);
           GotoXY(52, 11); Write(playSpeed);
           GotoXY(25, 22);
@@ -133,7 +280,7 @@ BEGIN
           Instructions;
       END;
     UNTIL ch IN ['P','C','I','E'];
-  UNTIL ch in ['P', 'C', 'E'];
+  UNTIL ch in ['P', 'E'];
   IF ch = 'E' THEN BEGIN
     Write('Exiting...');
     GotoXY(1, 24);
@@ -141,9 +288,6 @@ BEGIN
     GotoXY(1, 23);
     endwin;
     Halt;
-  END ELSE IF ch = 'C' THEN BEGIN { run configuration program }
-    GotoXY(1, 23);
-    ConfigureLadder;
   END;
 END;
 
@@ -164,13 +308,20 @@ BEGIN
   Assign(dataFile, DataFileName);
   Reset(dataFile);
   IF IOresult <> 0 THEN BEGIN
-    ConfigureLadder;
+    ConfigureLadder(FALSE);
+    Reset(dataFile); { file has been modified }
   END;
   BlockRead(dataFile, dataFileContents, SizeOf(dataFileContents) DIV 128);
   IF IOresult <> 0 THEN BEGIN
     WriteLN('Ladder not configred');
     WriteLN;
-    ConfigureLadder;
+    {
+      It wouldn't make sense to call this here if it was already called
+      above, but that shouldn't happen unless ConfigureLadder fails to
+      write a valid file; assume that won't happen.
+    }
+    ConfigureLadder(FALSE);
+    Reset(dataFile); { file has been modified }
   END;
   WITH dataFileContents DO BEGIN
     sound := Flags[0] = 'Y';
@@ -187,40 +338,6 @@ BEGIN
         highScores[i].Score := Highs[i][1] OR (Highs[i][2] SHL 8);
       FOR j := 1 TO Highs[i][0] DO
         highScores[i].Name[j] := CHAR(Highs[i][j + 2]);
-    END;
-  END;
-  Close(dataFile);
-  {$I+}
-END;
-
-{
-  Update the high scores in LADDER.DAT. See the comments in
-  ReadDataFile.
-}
-PROCEDURE WriteDataFile;
-VAR
-  dataFile : FILE;
-  i, j : INTEGER;
-BEGIN
-  {$I-}
-  Assign(dataFile, DataFileName);
-  Reset(dataFile);
-  IF IOresult <> 0 THEN BEGIN
-    WriteLN('Reset failed on LADDER.DAT');
-    Halt;
-  END;
-  WITH dataFileContents DO BEGIN
-    FOR i := 1 TO NumHighScores DO BEGIN
-      Highs[i][0] := Length(highScores[i].Name);
-      Highs[i][1] := Lo(highScores[i].Score);
-      Highs[i][2] := Hi(highScores[i].Score);
-      FOR j := 1 TO Highs[i][0] DO
-        Highs[i][j + 2] := ORD(highScores[i].Name[j]);
-    END;
-    BlockWrite(dataFile, dataFileContents, SizeOf(dataFileContents) DIV 128);
-    IF IOresult <> 0 THEN BEGIN
-      WriteLN('BlockWrite failed on LADDER.DAT');
-      Halt;
     END;
   END;
   Close(dataFile);
