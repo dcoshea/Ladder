@@ -22,6 +22,8 @@
 }
 PROGRAM ladder;
 
+USES NCrt, NCurses;
+
 {$I LADCONST}
 {$I LADTYPE}
 {$I LADVAR}

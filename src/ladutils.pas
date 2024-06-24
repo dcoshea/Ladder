@@ -1,19 +1,19 @@
 {
   Some terminal routines not handled by Turbo Pascal.
   
-  CursOff: turn the cursor off (set the string in LADCONST.PAS)
-  CursOn: turn the cursor on (set the string in LADCONST.PAS)
+  CursOff: turn the cursor off
+  CursOn: turn the cursor on
   Beep: ring the terminal bell
 }
 
 PROCEDURE CursOff;
 BEGIN
-  Write(CursOffStr);
+  curs_set(0);
 END;
 
 PROCEDURE CursOn;
 BEGIN
-  Write(CursOnStr);
+  curs_set(1);
 END;
 
 PROCEDURE Beep;
