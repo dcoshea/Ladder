@@ -121,7 +121,7 @@ BEGIN
 
       ch := #0;
       IF KeyPressed THEN BEGIN
-        Read(Kbd, ch);
+        ch := ReadKey;
         ch := UpCase(ch);
         IF ch = 'L' THEN BEGIN { change playing speed }
           playSpeed := SUCC(playSpeed MOD NumPlaySpeeds);
@@ -268,7 +268,7 @@ BEGIN
         END;
         WriteLN;
         While KeyPressed DO
-          Read(Kbd, ch);
+          ch := ReadKey;
         Write('Enter your name: ');
         CursOn;
         Read(name);
@@ -305,7 +305,7 @@ BEGIN
   GotoXY(1, 23); Write('Get ready!');
   Delay(1000);
   WHILE KeyPressed DO
-    Read(Kbd, ch);
+    ch := ReadKey;
   GotoXY(1, 23); Write('          ');
 END;
 

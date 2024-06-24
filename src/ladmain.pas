@@ -187,7 +187,7 @@ restartLevel:
       { end of tick handler =================================== }
     END;
     IF KeyPressed THEN BEGIN
-      Read(Kbd, ch);
+      ch := ReadKey;
       ch := UpCase(ch);
       IF ch = leftKey THEN BEGIN
         lad.DirRequest := LEFT
@@ -204,7 +204,7 @@ restartLevel:
         GotoXY(1, 23); Write('Type RETURN to continue: ');
         REPEAT
           WHILE NOT KeyPressed DO;
-          Read(Kbd, ch);
+          ch := ReadKey;
         UNTIL ch IN [#$0D, #$03];
         IF ch = #$03 THEN  { ^C goes back to main menu }
           GOTO restartGame;
