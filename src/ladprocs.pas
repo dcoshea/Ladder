@@ -137,6 +137,7 @@ BEGIN
     GotoXY(1, 24);
     ClrEOL;
     GotoXY(1, 23);
+    endwin;
     Halt;
   END ELSE IF ch = 'C' THEN BEGIN { run configuration program }
     GotoXY(1, 23);
@@ -271,7 +272,9 @@ BEGIN
           ch := ReadKey;
         Write('Enter your name: ');
         CursOn;
+        nEcho(TRUE);
         Read(name);
+        nEcho(FALSE);
         CursOff;
         GotoXY(1, 17);
         Write('Updating high scores...');

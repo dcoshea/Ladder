@@ -10,6 +10,13 @@ LABEL
   restartGame, restartLevel, newLevel;
 
 BEGIN { MAIN }
+  {
+    nCrt disables echo when Readkey() is running, but that isn't sufficient
+    to prevent the player's keystrokes from appearing on the screen.  Turn
+    echo off, and only turn it on when they are entering their name.
+  }
+  nEcho(FALSE);
+
   dispensers := NIL;        { initialize our linked lists for dispenser }
   m.Rocks := NIL;           { and rocks }
   lastScore := -1;
