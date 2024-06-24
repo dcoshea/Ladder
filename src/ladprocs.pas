@@ -65,7 +65,7 @@ BEGIN
     WriteLN('               LLLLLLLL   aaa aa   ddd dd   ddd dd   eeee   rr');
     WriteLN;
     WriteLN('                                       Version : ', Version);
-    WriteLN('(c) 1982, 1983 Yahoo Software          Terminal: ', dataFileContents.TerminalName);
+    WriteLN('(c) 1982, 1983 Yahoo Software          Terminal: ', nTermName);
     WriteLN('10970 Ashton Ave.  Suite 312           Play speed: ', playSpeed);
     Write(  'Los Angeles, Ca  90024                 ');
     WriteLN('Up = ', upKey, '  Down = ',downKey ,'  Left = ', leftKey, '  Right = ', rightKey);
