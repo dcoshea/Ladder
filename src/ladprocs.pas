@@ -1,4 +1,6 @@
 PROCEDURE Instructions;
+VAR
+  ignored : CHAR;
 BEGIN
   ClrScr;
   WriteLN;
@@ -25,7 +27,7 @@ BEGIN
   WriteLN;
   WriteLN;
   Write('Type RETURN to return to main menu: ');
-  Read;
+  Read(ignored);
 END;
 
 PROCEDURE ConfigureLadder;
