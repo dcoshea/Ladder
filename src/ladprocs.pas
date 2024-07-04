@@ -354,7 +354,6 @@ CONST
 VAR
   i, j : INTEGER;
   name: STRING[DataFileNameLength];
-  ch : CHAR;
 BEGIN
   FOR i := 1 TO NumSymbols DO BEGIN
     Beep;
@@ -388,7 +387,7 @@ BEGIN
         END;
         WriteLN;
         While KeyPressed DO
-          ch := ReadKey;
+          ReadKey; { ignore result }
         Write('Enter your name: ');
         CursOn;
         nEcho(TRUE);
@@ -409,7 +408,6 @@ END;
 PROCEDURE DrawMap;
 VAR
   x, y : INTEGER;
-  ch : CHAR;
 BEGIN
   FOR y := 1 TO LevelRows DO BEGIN
     GotoXY(1, y);
@@ -429,7 +427,7 @@ BEGIN
     press a key once they see the message.
   }
   WHILE KeyPressed DO
-    ch := ReadKey;
+    ReadKey; { ignore result }
   GotoXY(1, 23); Write('Press a key to start');
   ReadKey; { ignore result }
   GotoXY(1, 23); Write('                    ');
