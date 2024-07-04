@@ -197,7 +197,6 @@ VAR
   ch : CHAR;
   insult : BOOLEAN;
   i, msecs : INTEGER;
-  configPgm : FILE;
 BEGIN
   REPEAT
     ClrScr;
@@ -301,7 +300,7 @@ END;
 }
 PROCEDURE ReadDataFile;
 VAR
-  dataFile,configPgm : FILE;
+  dataFile : FILE;
   i, j : INTEGER;
 BEGIN
   {$I-}
