@@ -11,6 +11,23 @@ LABEL
 
 BEGIN { MAIN }
   {
+    Ensure that ncurses is shut down on exit.  It looks like just
+    using nCrt should ensure this, as nInit sets ExitProc, but that
+    doesn't appear to actually have the desired effect.
+
+    If a fatal error occurs, this means that it can't simply be
+    printed before exiting, since the following will always result in
+    the screen being cleared on exit, erasing any error message that
+    may have just been output.  FatalExit may be used to display a
+    message and then wait until a key is pressed before exiting.
+
+    TODO: Catch run time errors (see
+    https://wiki.freepascal.org/runtime_error) and output them using
+    FatalExit so that they can be read before the screen is cleared.
+  }
+  AddExitProc(@ExitHandler);
+
+  {
     nCrt disables echo when Readkey() is running, but that isn't sufficient
     to prevent the player's keystrokes from appearing on the screen.  Turn
     echo off, and only turn it on when they are entering their name.

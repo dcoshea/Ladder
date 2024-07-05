@@ -7,6 +7,7 @@ VAR
   newDispenser : DispenserPointerType;
   dispenserPtr : DispenserPointerType;
   rock1Ptr,rock2Ptr : RockPointerType;
+  errorMessage : STRING[32];
 BEGIN
   { get rid of anay previous rock dispensers }
   WHILE dispensers <> NIL DO BEGIN
@@ -15,10 +16,8 @@ BEGIN
     dispensers := dispenserPtr;
   END;
   IF m.Level > NumLevels THEN BEGIN
-    ClrScr;
-    WriteLN('Level ', m.Level, ' out of range');
-    CursOn;
-    Halt;
+    WriteStr(errorMessage, 'Level ', m.Level, ' out of range');
+    FatalExit(errorMessage);
   END;
   WITH levels[m.Level] DO BEGIN
     m.Name := Name;

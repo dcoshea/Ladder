@@ -18,10 +18,8 @@ BEGIN
   {$I-}
   Assign(dataFile, DataFileName);
   Rewrite(dataFile);
-  IF IOresult <> 0 THEN BEGIN
-    WriteLN('Rewrite failed on LADDER.DAT');
-    Halt;
-  END;
+  IF IOresult <> 0 THEN
+    FatalExit('Rewrite failed on LADDER.DAT');
   WITH dataFileContents DO BEGIN
     Flags[0] := BooleanToYN(sound);
     Flags[1] := BooleanToYN(insults);
@@ -37,10 +35,8 @@ BEGIN
         Highs[i][j + 2] := ORD(highScores[i].Name[j]);
     END;
     BlockWrite(dataFile, dataFileContents, SizeOf(dataFileContents) DIV 128);
-    IF IOresult <> 0 THEN BEGIN
-      WriteLN('BlockWrite failed on LADDER.DAT');
-      Halt;
-    END;
+    IF IOresult <> 0 THEN
+      FatalExit('BlockWrite failed on LADDER.DAT');
   END;
   Close(dataFile);
   {$I+}
@@ -285,7 +281,6 @@ BEGIN
     GotoXY(1, 24);
     ClrEOL;
     GotoXY(1, 23);
-    endwin;
     Halt;
   END;
 END;
@@ -512,5 +507,10 @@ BEGIN
     rockPtr := rockPtr^.Next;
   END;
   m.AnyRocksPending := TRUE;
+END;
+
+PROCEDURE ExitHandler;
+BEGIN
+  endwin;
 END;
 

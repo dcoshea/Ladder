@@ -1,3 +1,9 @@
+PROCEDURE FatalExit(message : STRING);
+BEGIN
+  nShowMessage(message, 15, 'Fatal error', 15, TRUE);
+  Halt;
+END;
+
 {
   Some terminal routines not handled by Turbo Pascal.
   
